@@ -11,3 +11,4 @@
 11. As a user, I can upload the audios to the corresponding pages.
 12. As a user, I can save public books to my private library.
 13. As a user, I can see all the books I have opened and their statuses.
+14. Incorporate CI/CD pipeline
