@@ -31,3 +31,6 @@ yarn.loc
 *.lst
 *.jar.original
 pom.properties
+
+# ignore target folder
+target/
