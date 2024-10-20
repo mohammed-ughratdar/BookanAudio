@@ -24,3 +24,5 @@ package-lock.json
 
 # Ignore yarn.lock for Yarn
 yarn.loc
+
+.*class
