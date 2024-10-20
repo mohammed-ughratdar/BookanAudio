@@ -24,3 +24,10 @@ package-lock.json
 
 # Ignore yarn.lock for Yarn
 yarn.loc
+
+# Compiled files to ignore
+*.class
+*.jar
+*.lst
+*.jar.original
+pom.properties
