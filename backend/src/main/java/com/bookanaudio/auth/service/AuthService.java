@@ -5,25 +5,55 @@ import com.bookanaudio.auth.dto.LoginRequest;
 import com.bookanaudio.auth.dto.RegisterRequest;
 import com.bookanaudio.auth.exception.AuthException;
 import com.bookanaudio.auth.model.User;
+import com.bookanaudio.auth.model.OAuthUser;
 import com.bookanaudio.auth.repository.UserRepository;
+import com.bookanaudio.auth.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
 
 @Service
 public class AuthService {
 
-    @Autowired
-    private UserRepository userRepository;
+    @Value("${google.client_id}")
+    private String clientId;
+
+    @Value("${google.client_secret}")
+    private String clientSecret;
+
+    @Value("${google.redirect_uri}")
+    private String redirectUri;
+
+    @Value("${google.token_endpoint}")
+    private String tokenEndpoint;
+
+    @Value("${google.user_info_endpoint}")
+    private String userInfoEndpoint;
+
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    public AuthService(UserRepository userRepository, JwtUtil jwtUtil) {
+        this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
+    }
 
     public AuthResponse login(LoginRequest loginRequest) {
         User user = userRepository.findByUsername(loginRequest.getUsername());
         if (user == null || !passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new AuthException("Invalid credentials");
         }
-        String token = generateToken(user); 
+        String token = jwtUtil.generateToken(user.getUsername());
         return new AuthResponse(token, user.getUsername());
     }
 
@@ -38,7 +68,66 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    private String generateToken(User user) {
-        return "token"; 
+    public AuthResponse oauthLogin(String authorizationCode, String statet) {
+
+        String accessToken = fetchAccessToken(authorizationCode);
+        OAuthUser oAuthUser = fetchOAuthUserInfo(accessToken);
+
+        User user = userRepository.findByEmail(oAuthUser.getEmail());
+
+        if (user == null) {
+            user = registerOauthUser(oAuthUser);
+        }
+
+        String token = jwtUtil.generateToken(user.getUsername());
+        return new AuthResponse(token, user.getUsername());
     }
+
+    public User registerOauthUser(OAuthRequest oauthRequest) {
+        String username = generateUsername(oauthRequest.getEmail());
+
+        User user = new User();
+        user.setEmail(oauthRequest.getEmail());
+        user.setUsername(username);
+
+        userRepository.save(user);
+
+        return user;
+    }
+
+    private String fetchAccessToken(String authorizationCode) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("code", authorizationCode);
+        requestBody.put("client_id", client_id);
+        requestBody.put("client_secret", client_secret);
+        requestBody.put("redirect_uri", redirect_uri);
+        requestBody.put("grant_type", "authorization_code");
+
+        Map<String, Object> response = restTemplate.postForObject(token_endpoint, requestBody, Map.class);
+
+        if (response != null && response.containsKey("access_token")) {
+            return response.get("access_token").toString();
+
+        throw new RuntimeException("Failed to retrieve access token from Google");
+
+    }
+
+    private OAuthUserUser fetchGoogleUserInfo(String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        String userInfoEndpoint = user_info_endpoint;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<OAuthUser> response = restTemplate.exchange(userInfoEndpoint, HttpMethod.GET, entity, OAuthUser.class);
+        return response.getBody();
+    }
+
+    private String generateUsername(String email) {
+        return email.split("@")[0] + "_user";
+    }
+
 }
