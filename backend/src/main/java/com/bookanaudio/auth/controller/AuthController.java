@@ -3,7 +3,6 @@ package com.bookanaudio.auth.controller;
 import com.bookanaudio.auth.dto.AuthResponse;
 import com.bookanaudio.auth.dto.LoginRequest;
 import com.bookanaudio.auth.dto.RegisterRequest;
-import com.bookanaudio.auth.dto.OAuthResponse;
 import com.bookanaudio.auth.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +28,9 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully");
     }
 
-    @PostMapping("/oauth/callback")
-    public ResponseEntity<AuthResponse> oauthLogin(@RequestParam("code") String authorizationCode,
-                                                   @RequestParam("state") String state) {
-        AuthResponse authResponse = authService.oauthLogin(authorizationCode, state);
+    @GetMapping("/oauth/callback")
+    public ResponseEntity<AuthResponse> oauthLogin(@RequestParam("code") String authorizationCode) {
+        AuthResponse authResponse = authService.oauthLogin(authorizationCode);
 
         return ResponseEntity.ok(authResponse);
     }
