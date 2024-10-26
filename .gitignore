@@ -34,3 +34,6 @@ pom.properties
 
 # ignore target folder
 target/
+
+# ignore secrets file
+secrets.properties

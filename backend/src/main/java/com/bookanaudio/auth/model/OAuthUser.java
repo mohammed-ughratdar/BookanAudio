@@ -1,6 +1,6 @@
 package com.bookanaudio.auth.model;
 
-public class GoogleUser {
+public class OAuthUser {
 
     private String email;
     private String name;

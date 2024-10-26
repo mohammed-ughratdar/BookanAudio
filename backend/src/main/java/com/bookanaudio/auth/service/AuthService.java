@@ -18,6 +18,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @Service
@@ -68,7 +71,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public AuthResponse oauthLogin(String authorizationCode, String statet) {
+    public AuthResponse oauthLogin(String authorizationCode) {
 
         String accessToken = fetchAccessToken(authorizationCode);
         OAuthUser oAuthUser = fetchOAuthUserInfo(accessToken);
@@ -83,11 +86,11 @@ public class AuthService {
         return new AuthResponse(token, user.getUsername());
     }
 
-    public User registerOauthUser(OAuthRequest oauthRequest) {
-        String username = generateUsername(oauthRequest.getEmail());
+    public User registerOauthUser(OAuthUser oAuthUser) {
+        String username = generateUsername(oAuthUser.getEmail());
 
         User user = new User();
-        user.setEmail(oauthRequest.getEmail());
+        user.setEmail(oAuthUser.getEmail());
         user.setUsername(username);
 
         userRepository.save(user);
@@ -100,23 +103,22 @@ public class AuthService {
 
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("code", authorizationCode);
-        requestBody.put("client_id", client_id);
-        requestBody.put("client_secret", client_secret);
-        requestBody.put("redirect_uri", redirect_uri);
+        requestBody.put("client_id", clientId);
+        requestBody.put("client_secret", clientSecret);
+        requestBody.put("redirect_uri", redirectUri);
         requestBody.put("grant_type", "authorization_code");
 
-        Map<String, Object> response = restTemplate.postForObject(token_endpoint, requestBody, Map.class);
+        Map<String, Object> response = restTemplate.postForObject(tokenEndpoint, requestBody, Map.class);
 
-        if (response != null && response.containsKey("access_token")) {
+        if (response != null && response.containsKey("access_token"))
             return response.get("access_token").toString();
 
         throw new RuntimeException("Failed to retrieve access token from Google");
-
+        
     }
 
-    private OAuthUserUser fetchGoogleUserInfo(String accessToken) {
+    private OAuthUser fetchOAuthUserInfo(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
-        String userInfoEndpoint = user_info_endpoint;
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
 
