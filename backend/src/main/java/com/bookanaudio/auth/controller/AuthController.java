@@ -23,8 +23,15 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
-        System.out.println("Called here");
+
         authService.register(registerRequest);
         return ResponseEntity.ok("User registered successfully");
+    }
+
+    @GetMapping("/oauth/callback")
+    public ResponseEntity<AuthResponse> oauthLogin(@RequestParam("code") String authorizationCode) {
+        AuthResponse authResponse = authService.oauthLogin(authorizationCode);
+
+        return ResponseEntity.ok(authResponse);
     }
 }
