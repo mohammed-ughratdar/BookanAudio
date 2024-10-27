@@ -114,7 +114,7 @@ public class AuthService {
             return response.get("access_token").toString();
 
         throw new RuntimeException("Failed to retrieve access token from Google");
-        
+
     }
 
     private OAuthUser fetchOAuthUserInfo(String accessToken) {
