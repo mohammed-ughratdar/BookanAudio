@@ -11,12 +11,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/books")
-public class BooksController {
+public class BookController {
 
     private final BookService bookService;
 
     @Autowired
-    public BooksController(BookService bookService) {
+    public BookController(BookService bookService) {
         this.bookService = bookService;
     }
 
@@ -30,5 +30,12 @@ public class BooksController {
     public ResponseEntity<BookResponse> saveBook(@RequestBody BookRequest bookRequest) {
         BookResponse book = bookService.saveBook(bookRequest);
         return ResponseEntity.ok(book);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<BookResponse>> getAllFilteredBooks(@RequestParam("author") String author,
+                                                          @RequestParam("genre") String genre) {
+        List<BookResponse> allBooks = bookService.getAllFilteredBooks(author, genre);
+        return ResponseEntity.ok(allBooks);
     }
 }
