@@ -1,6 +1,7 @@
 package com.bookanaudio.books.controller;
 
-import com.bookanaudio.books.dto.AllBooksResponse;
+import com.bookanaudio.books.dto.BookResponse;
+import com.bookanaudio.books.dto.BookRequest;
 import com.bookanaudio.books.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,14 @@ public class BooksController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AllBooksResponse>> getAllBooks() {
-        List<AllBooksResponse> allBooks = bookService.getAllBooks();
+    public ResponseEntity<List<BookResponse>> getAllBooks() {
+        List<BookResponse> allBooks = bookService.getAllBooks();
         return ResponseEntity.ok(allBooks);
+    }
+
+    @PostMapping
+    public ResponseEntity<BookResponse> saveBook(@RequestBody BookRequest bookRequest) {
+        BookResponse book = bookService.saveBook(bookRequest);
+        return ResponseEntity.ok(book);
     }
 }

@@ -1,6 +1,7 @@
 package com.bookanaudio.books.service;
 
-import com.bookanaudio.books.dto.AllBooksResponse;
+import com.bookanaudio.books.dto.BookResponse;
+import com.bookanaudio.books.dto.BookRequest;
 import com.bookanaudio.books.exception.BookException;
 import com.bookanaudio.books.model.Book;
 import com.bookanaudio.books.repository.BookRepository;
@@ -18,16 +19,16 @@ public class BookService {
         this.bookRepository = bookRepository;
     }
 
-    public List<AllBooksResponse> getAllBooks() {
+    public List<BookResponse> getAllBooks() {
         List<Book> books = bookRepository.findAll();
-        
+
         if (books == null || books.isEmpty()) {
             return new ArrayList<>();
         }
 
-        List<AllBooksResponse> allBooks = new ArrayList<>(); 
+        List<BookResponse> allBooks = new ArrayList<>();
         for (Book book : books) {
-            AllBooksResponse bookResponse = new AllBooksResponse();
+            BookResponse bookResponse = new BookResponse();
 
             bookResponse.setId(book.getId());
             bookResponse.setName(book.getName());
@@ -38,5 +39,27 @@ public class BookService {
             allBooks.add(bookResponse);
         }
         return allBooks;
+    }
+
+    public BookResponse saveBook(BookRequest bookRequest) {
+
+        Book book = new Book();
+
+        book.setName(bookRequest.getName());
+        book.setAuthor(bookRequest.getAuthor());
+        book.setGenre(bookRequest.getGenre());
+        book.setChapterNamingScheme(bookRequest.getChapterNamingScheme());
+
+        Book savedBook = bookRepository.save(book);
+
+        BookResponse bookResponse = new BookResponse();
+
+        bookResponse.setId(savedBook.getId());
+        bookResponse.setName(savedBook.getName());
+        bookResponse.setGenre(savedBook.getGenre());
+        bookResponse.setAuthor(savedBook.getAuthor());
+        bookResponse.setChapterNamingScheme(savedBook.getChapterNamingScheme());
+
+        return bookResponse;
     }
 }

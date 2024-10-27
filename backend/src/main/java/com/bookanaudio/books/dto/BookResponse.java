@@ -1,6 +1,6 @@
 package com.bookanaudio.books.dto;
 
-public class AllBooksResponse {
+public class BookResponse {
     private Long id;
     private String name;
     private String author;
