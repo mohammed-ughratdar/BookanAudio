@@ -37,3 +37,6 @@ target/
 
 # ignore secrets file
 secrets.properties
+
+# ignore .DS_Store
+.DS_Store
