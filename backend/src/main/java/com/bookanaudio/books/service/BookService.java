@@ -4,9 +4,11 @@ import com.bookanaudio.books.dto.BookResponse;
 import com.bookanaudio.books.dto.BookRequest;
 import com.bookanaudio.books.exception.BookException;
 import com.bookanaudio.books.model.Book;
+import com.bookanaudio.books.service.S3Service;
 import com.bookanaudio.books.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -14,9 +16,11 @@ import java.util.ArrayList;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final S3Service s3Service;
 
-    public BookService(BookRepository bookRepository) {
+    public BookService(BookRepository bookRepository, S3Service s3Service) {
         this.bookRepository = bookRepository;
+        this.s3Service = s3Service;
     }
 
     public List<BookResponse> getAllBooks() {
@@ -40,19 +44,20 @@ public class BookService {
         return allBooks;
     }
 
-    public BookResponse saveBook(BookRequest bookRequest) {
+    public BookResponse saveBook(BookRequest bookRequest, MultipartFile bookFile) {
 
         Book book = new Book();
-
         book.setName(bookRequest.getName());
         book.setAuthor(bookRequest.getAuthor());
         book.setGenre(bookRequest.getGenre());
         book.setChapterNamingScheme(bookRequest.getChapterNamingScheme());
 
+
         Book savedBook = bookRepository.save(book);
 
-        BookResponse bookResponse = new BookResponse();
+        s3Service.uploadBook(bookFile, savedBook.getId());
 
+        BookResponse bookResponse = new BookResponse();
         bookResponse.setId(savedBook.getId());
         bookResponse.setName(savedBook.getName());
         bookResponse.setGenre(savedBook.getGenre());
@@ -61,6 +66,7 @@ public class BookService {
 
         return bookResponse;
     }
+
 
     public List<BookResponse> getAllFilteredBooks(String author, String genre) {
         if (author != null && author.trim().isEmpty())
