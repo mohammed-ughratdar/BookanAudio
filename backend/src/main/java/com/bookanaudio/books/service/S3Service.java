@@ -1,16 +1,23 @@
 package com.bookanaudio.books.service;
 
+import com.bookanaudio.books.dto.PageData;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.File;
 import java.io.IOException;
+import java.util.*;
 
 @Service
 public class S3Service {
@@ -26,18 +33,58 @@ public class S3Service {
         this.bucketName = bucketName;
         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
         this.s3Client = AmazonS3ClientBuilder.standard()
-                .withRegion("eu-north-1") 
+                .withRegion("eu-north-1")
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
                 .build();
     }
 
-    public void uploadBook(MultipartFile bookFile) {
+    public void uploadBook(MultipartFile bookFile, Long bookId) {
+        String bookName = bookFile.getOriginalFilename();
+        try (PDDocument document = PDDocument.load(bookFile.getInputStream())) {
+
+            List<PageData> pagesData = extractPages(document, bookName, bookId);
+            pagesData.forEach(page ->
+            System.out.println("Book ID: " + page.getBookId() +
+                               ", URL: " + page.getPageUrl() +
+                               ", Page Number: " + page.getPageNumber()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<PageData> extractPages(PDDocument document, String bookName, Long bookId) {
+        int totalPages = document.getNumberOfPages();
+        List<PageData> pagesData = new ArrayList<>();
+
+        for (int i = 0; i < totalPages; i++) {
+            try (PDDocument singlePageDocument = new PDDocument()) {
+                PDPage page = document.getPage(i);
+                singlePageDocument.addPage(page);
+
+                String fileName = String.format("%s/page_%d.pdf", bookName, i + 1);
+
+                ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+                singlePageDocument.save(outStream);
+                String pageUrl = uploadPage(new ByteArrayInputStream(outStream.toByteArray()), fileName, outStream.size());
+
+                pagesData.add(new PageData(pageUrl, i + 1, bookId));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return pagesData;
+    }
+
+    public String uploadPage(InputStream inputStream, String fileName, Long contentLength) {
         try {
             ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentLength(bookFile.getSize());
-            s3Client.putObject(new PutObjectRequest(bucketName, bookFile.getOriginalFilename(), bookFile.getInputStream(), metadata));
-        } catch (IOException e) {
-            e.printStackTrace(); 
+            metadata.setContentLength(contentLength);
+            s3Client.putObject(new PutObjectRequest(bucketName, fileName, inputStream, metadata));
+            return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, "eu-north-1", fileName);
+             
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
