@@ -16,12 +16,10 @@ import java.util.List;
 public class BookController {
 
     private final BookService bookService;
-    private final S3Service s3Service;
 
     @Autowired
-    public BookController(BookService bookService, S3Service s3Service) {
+    public BookController(BookService bookService){
         this.bookService = bookService;
-        this.s3Service = s3Service;
     }
 
     @GetMapping
@@ -31,22 +29,19 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity<BookResponse> saveBook(@RequestBody BookRequest bookRequest) {
-        BookResponse book = bookService.saveBook(bookRequest);
-        return ResponseEntity.ok(book);
+    public ResponseEntity<BookResponse> saveBook(@RequestPart("bookRequest") BookRequest bookRequest,
+                                                 @RequestParam("file") MultipartFile bookFile) {
+
+        BookResponse bookResponse = bookService.saveBook(bookRequest, bookFile);
+        return ResponseEntity.ok(bookResponse);
     }
+
 
     @GetMapping("/filter")
     public ResponseEntity<List<BookResponse>> getAllFilteredBooks(@RequestParam("author") String author,
                                                           @RequestParam("genre") String genre) {
         List<BookResponse> allBooks = bookService.getAllFilteredBooks(author, genre);
         return ResponseEntity.ok(allBooks);
-    }
-
-    @PostMapping("/upload")
-    public ResponseEntity uploadBook(@RequestParam("file") MultipartFile bookFile) {
-        s3Service.uploadBook(bookFile);
-        return ResponseEntity.ok("File uploaded successfully");
     }
 
 }
