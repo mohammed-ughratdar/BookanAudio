@@ -3,9 +3,11 @@ package com.bookanaudio.books.controller;
 import com.bookanaudio.books.dto.BookResponse;
 import com.bookanaudio.books.dto.BookRequest;
 import com.bookanaudio.books.service.BookService;
+import com.bookanaudio.books.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -14,10 +16,12 @@ import java.util.List;
 public class BookController {
 
     private final BookService bookService;
+    private final S3Service s3Service;
 
     @Autowired
-    public BookController(BookService bookService) {
+    public BookController(BookService bookService, S3Service s3Service) {
         this.bookService = bookService;
+        this.s3Service = s3Service;
     }
 
     @GetMapping
@@ -38,4 +42,11 @@ public class BookController {
         List<BookResponse> allBooks = bookService.getAllFilteredBooks(author, genre);
         return ResponseEntity.ok(allBooks);
     }
+
+    @PostMapping("/upload")
+    public ResponseEntity uploadBook(@RequestParam("file") MultipartFile bookFile) {
+        s3Service.uploadBook(bookFile);
+        return ResponseEntity.ok("File uploaded successfully");
+    }
+
 }
