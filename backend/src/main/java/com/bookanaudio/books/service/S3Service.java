@@ -65,7 +65,7 @@ public class S3Service {
 
                 ByteArrayOutputStream outStream = new ByteArrayOutputStream();
                 singlePageDocument.save(outStream);
-                String pageUrl = uploadPage(new ByteArrayInputStream(outStream.toByteArray()), fileName, outStream.size());
+                String pageUrl = uploadPage(new ByteArrayInputStream(outStream.toByteArray()), fileName, (long) outStream.size());
 
                 pagesData.add(new PageData(pageUrl, i + 1, bookId));
             } catch (IOException e) {
@@ -81,7 +81,7 @@ public class S3Service {
             metadata.setContentLength(contentLength);
             s3Client.putObject(new PutObjectRequest(bucketName, fileName, inputStream, metadata));
             return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, "eu-north-1", fileName);
-             
+
         } catch (Exception e) {
             e.printStackTrace();
             return null;
