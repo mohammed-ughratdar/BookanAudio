@@ -18,7 +18,7 @@ public class Page {
 
     @Column(name = "s3_url", nullable = false)
     private String s3Url;
-    
+
     private String chapter;
 
     public Long getId() {
@@ -60,5 +60,5 @@ public class Page {
     public void setChapter(String chapter) {
         this.chapter = chapter;
     }
-   
+
 }

@@ -46,6 +46,6 @@ public class PageResponse {
 
     public void setChapter(String chapter) {
         this.chapter = chapter;
-    }  
+    }
 
 }
