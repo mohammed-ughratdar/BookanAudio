@@ -29,5 +29,5 @@ public class PageRequest {
     public void setBookId(Long bookId) {
         this.bookId = bookId;
     }
-    
+
 }
