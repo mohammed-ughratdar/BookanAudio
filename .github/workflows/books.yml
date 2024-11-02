@@ -38,6 +38,10 @@ jobs:
           cd backend/books
           docker build -t 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:books-latest .
 
+      - name: Tag Docker image
+        run: |
+          docker tag 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:books-latest
+
       - name: Push Docker image
         run: |
           docker push 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:books-latest
