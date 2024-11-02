@@ -36,12 +36,20 @@ jobs:
       - name: Build Docker image
         run: |
           cd backend/auth
-          docker build -t 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:auth-latest .
+          docker build -t bookanaudio-auth .
 
-      - name: Push Docker image
+      - name: Tag Docker image with ECR repository
+        run: |
+          docker tag bookanaudio-auth 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:auth-latest
+
+      - name: Push Docker image to ECR
         run: |
           docker push 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:auth-latest
 
-      - name: Update Lambda function
+      - name: Update Lambda Function Code
         run: |
           aws lambda update-function-code --function-name authenticate --image-uri 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:auth-latest
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}

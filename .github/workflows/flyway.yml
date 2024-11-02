@@ -1,0 +1,24 @@
+
+#name: Flyway Migration
+
+#on:
+ # push:
+  #  paths:
+   #   - 'test_database/migrations/**'
+    #  - '.github/workflows/**'
+
+#jobs:
+ # migrate:
+  #  runs-on: ubuntu-latest
+   # steps:
+    #  - name: Checkout code
+     #   uses: actions/checkout@v2
+
+      #- name: Run Flyway Migrations
+       # run: |
+        #  docker run --rm \
+         #   -v ${{ github.workspace }}/test_database/migrations:/flyway/sql \
+          #  flyway/flyway migrate \
+           # -url=${{ secrets.AWS_DB_URL }} \
+           # -user=${{ secrets.LOCAL_USERNAME }} \
+           # -password=${{ secrets.LOCAL_PASSWORD }}
