@@ -1,9 +1,10 @@
-name: Deploy Pages Module
+name: Deploy Auth Module
 
 on:
   push:
     paths:
-      - 'backend/pages/**'
+      - 'backend/auth/**'
+      - '.github/workflows/auth/**'
 
 jobs:
   build-and-deploy:
@@ -21,7 +22,7 @@ jobs:
 
       - name: Build JAR
         run: |
-          cd backend/pages
+          cd backend/auth
           mvn clean package -DskipTests
 
       - name: Log in to ECR
@@ -34,13 +35,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          cd backend/pages
-          docker build -t 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:pages-latest .
+          cd backend/auth
+          docker build -t 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:auth-latest .
 
       - name: Push Docker image
         run: |
-          docker push 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:pages-latest
+          docker push 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:auth-latest
 
       - name: Update Lambda function
         run: |
-          aws lambda update-function-code --function-name pages --image-uri 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:pages-latest
+          aws lambda update-function-code --function-name authenticate --image-uri 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:auth-latest
