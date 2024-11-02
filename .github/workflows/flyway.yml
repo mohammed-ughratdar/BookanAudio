@@ -18,6 +18,6 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}/test_database/migrations:/flyway/sql \
             flyway/flyway migrate \
-            -url=${{ secrets.LOCAL_DB_URL }} \
+            -url=${{ secrets.AWS_DB_URL }} \
             -user=${{ secrets.LOCAL_USERNAME }} \
             -password=${{ secrets.LOCAL_PASSWORD }}
