@@ -12,15 +12,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Flyway
+      - name: Run Flyway Migrations
         run: |
-          curl -L -O https://flywaydb.org/download/community/flyway-commandline-7.8.1-linux-x64.zip
-          unzip flyway-commandline-7.8.1-linux-x64.zip
-
-      - name: Run migrations
-        run: |
-          ./flyway-7.8.1/flyway migrate
-        env:
-          FLYWAY_URL: ${{ secrets.LOCAL_DB_URL }}
-          FLYWAY_USER: ${{ secrets.LOCAL_USERNAME }}
-          FLYWAY_PASSWORD: ${{ secrets.LOCAL_PASSWORD }}
+          docker run --rm \
+            -v ${{ github.workspace }}/test_database/migrations:/flyway/sql \
+            flyway/flyway migrate \
+            -url=${{ secrets.LOCAL_DB_URL }} \
+            -user=${{ secrets.LOCAL_USERNAME }} \
+            -password=${{ secrets.LOCAL_PASSWORD }}
