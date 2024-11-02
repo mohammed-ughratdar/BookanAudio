@@ -42,6 +42,10 @@ jobs:
         run: |
           docker push 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:auth-latest
 
-      - name: Update Lambda function
+      - name: Update Lambda Function Code
         run: |
-          aws lambda update-function-code --function-name authenticate --image-uri 084828565416.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bookanaudio-private:auth-latest
+          aws lambda update-function-code --function-name authenticate --image-uri 084828565416.dkr.ecr.***.amazonaws.com/bookanaudio-private:auth-latest --debug
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
