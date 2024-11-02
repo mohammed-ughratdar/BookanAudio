@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'backend/pages/**'
-      - '.github/workflows/pages/**'
+      - '.github/workflows/**'
 
 jobs:
   build-and-deploy:
