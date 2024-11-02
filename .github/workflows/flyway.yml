@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'test_database/migrations/**'
+      - '.github/workflows/**'
 
 jobs:
   migrate:
