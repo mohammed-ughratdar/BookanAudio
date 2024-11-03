@@ -26,19 +26,19 @@ import java.util.Map;
 @Service
 public class AuthService {
 
-    @Value("${google.client_id}")
+    @Value("${google_client_id}")
     private String clientId;
 
-    @Value("${google.client_secret}")
+    @Value("${google_client_secret}")
     private String clientSecret;
 
-    @Value("${google.redirect_uri}")
+    @Value("${google_redirect_uri}")
     private String redirectUri;
 
-    @Value("${google.token_endpoint}")
+    @Value("${google_token_endpoint}")
     private String tokenEndpoint;
 
-    @Value("${google.user_info_endpoint}")
+    @Value("${google_user_info_endpoint}")
     private String userInfoEndpoint;
 
     private final UserRepository userRepository;
