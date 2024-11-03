@@ -3,7 +3,7 @@ name: Deploy Auth Module
 on:
   push:
     branches:
-      - develop 
+      - develop
     paths:
       - 'backend/auth/**'
       - '.github/workflows/**'

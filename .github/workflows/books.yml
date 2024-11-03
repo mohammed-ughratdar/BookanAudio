@@ -3,7 +3,7 @@ name: Deploy Books Module
 on:
   push:
     branches:
-      - develop 
+      - develop
     paths:
       - 'backend/books/**'
       - '.github/workflows/**'

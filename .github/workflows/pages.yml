@@ -3,7 +3,7 @@ name: Deploy Pages Module
 on:
   push:
     branches:
-      - develop 
+      - develop
     paths:
       - 'backend/pages/**'
       - '.github/workflows/**'
