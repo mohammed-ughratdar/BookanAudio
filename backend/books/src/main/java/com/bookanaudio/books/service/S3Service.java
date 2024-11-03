@@ -26,9 +26,9 @@ public class S3Service {
     private final String bucketName;
 
     public S3Service(
-            @Value("${s3.bucket_name}") String bucketName,
-            @Value("${s3.access_key}") String accessKey,
-            @Value("${s3.secret_key}") String secretKey
+            @Value("${s3_bucket_name}") String bucketName,
+            @Value("${iam_access_key}") String accessKey,
+            @Value("${iam_secret_key}") String secretKey
     ) {
         this.bucketName = bucketName;
         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
