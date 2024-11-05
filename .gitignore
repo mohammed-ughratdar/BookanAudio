@@ -47,3 +47,4 @@ copies
 # sam config files
 .aws-sam
 packaged.yaml
+temp

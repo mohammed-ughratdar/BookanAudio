@@ -4,7 +4,7 @@ import com.bookanaudio.books.dto.BookResponse;
 import com.bookanaudio.books.dto.BookRequest;
 import com.bookanaudio.books.exception.BookException;
 import com.bookanaudio.books.model.Book;
-import com.bookanaudio.books.service.S3Service;
+import com.bookanaudio.books.service.ExtractPagesService;
 import com.bookanaudio.books.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,11 +16,11 @@ import java.util.ArrayList;
 public class BookService {
 
     private final BookRepository bookRepository;
-    private final S3Service s3Service;
+    private final ExtractPagesService extractPagesService;
 
-    public BookService(BookRepository bookRepository, S3Service s3Service) {
+    public BookService(BookRepository bookRepository, ExtractPagesService extractPagesService) {
         this.bookRepository = bookRepository;
-        this.s3Service = s3Service;
+        this.extractPagesService = extractPagesService;
     }
 
     public List<BookResponse> getAllBooks() {
@@ -52,10 +52,8 @@ public class BookService {
         book.setGenre(bookRequest.getGenre());
         book.setChapterNamingScheme(bookRequest.getChapterNamingScheme());
 
-
         Book savedBook = bookRepository.save(book);
-
-        s3Service.uploadBook(bookFile, savedBook.getId());
+        extractPagesService.uploadBook(bookFile, savedBook.getId());
 
         BookResponse bookResponse = new BookResponse();
         bookResponse.setId(savedBook.getId());

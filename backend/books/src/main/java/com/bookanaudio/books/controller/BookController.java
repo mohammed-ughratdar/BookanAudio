@@ -3,7 +3,7 @@ package com.bookanaudio.books.controller;
 import com.bookanaudio.books.dto.BookResponse;
 import com.bookanaudio.books.dto.BookRequest;
 import com.bookanaudio.books.service.BookService;
-import com.bookanaudio.books.service.S3Service;
+import com.bookanaudio.books.service.ExtractPagesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
