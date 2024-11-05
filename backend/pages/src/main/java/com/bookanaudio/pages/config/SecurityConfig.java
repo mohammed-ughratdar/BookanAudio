@@ -1,4 +1,4 @@
-package com.bookanaudio.auth.config;
+package com.bookanaudio.pages.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
