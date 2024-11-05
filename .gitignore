@@ -40,3 +40,9 @@ secrets.properties
 
 # ignore .DS_Store
 .DS_Store
+
+# ignore copies
+copies
+
+# sam config files
+.aws-sam
