@@ -1,0 +1,217 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A Serverless application with shared REST API Gateway and multiple Lambda modules.
+
+Resources:
+  # Shared REST API Gateway
+  SharedRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+
+  # Auth Module Lambda function
+  AuthenticateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/auth
+      Handler: com.bookanaudio.StreamLambdaHandler::handleRequest
+      Runtime: java17
+      MemorySize: 256
+      Timeout: 30
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:eu-north-1:084828565416:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: arn:aws:logs:eu-north-1:084828565416:log-group:/aws/lambda/authenticate:*
+            - Effect: Allow
+              Action:
+                - ec2:DescribeNetworkInterfaces
+                - ec2:CreateNetworkInterface
+                - ec2:DeleteNetworkInterface
+                - ec2:DescribeInstances
+                - ec2:AttachNetworkInterface
+              Resource: '*'
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-04d27e332409719bc
+          - sg-0efdaec8b6dd45aab
+          - sg-06cb953f0b79305bb
+        SubnetIds:
+          - subnet-0677f857a04b07da8
+          - subnet-06ec8ddeb623b3f9e
+          - subnet-02ce3eebf7110a947
+      Events:
+        ApiAuthLogin:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /auth/login
+            Method: POST
+        ApiAuthRegister:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /auth/register
+            Method: POST
+        ApiAuthVerify:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /auth/verify
+            Method: GET
+
+  # Books Module Lambda function
+  BooksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/books
+      Handler: com.bookanaudio.StreamLambdaHandler::handleRequest
+      Runtime: java17
+      MemorySize: 256
+      Timeout: 30
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:eu-north-1:084828565416:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: arn:aws:logs:eu-north-1:084828565416:log-group:/aws/lambda/books:*
+            - Effect: Allow
+              Action:
+                - ec2:DescribeNetworkInterfaces
+                - ec2:CreateNetworkInterface
+                - ec2:DeleteNetworkInterface
+                - ec2:DescribeInstances
+                - ec2:AttachNetworkInterface
+              Resource: '*'
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-04d27e332409719bc
+          - sg-0efdaec8b6dd45aab
+          - sg-06cb953f0b79305bb
+        SubnetIds:
+          - subnet-0677f857a04b07da8
+          - subnet-06ec8ddeb623b3f9e
+          - subnet-02ce3eebf7110a947
+      Events:
+        ApiGetBooks:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books
+            Method: GET
+        ApiPostBook:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books
+            Method: POST
+        ApiFilterBooks:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books/filter
+            Method: GET
+
+  # Pages Module Lambda function
+  PagesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/pages
+      Handler: com.bookanaudio.StreamLambdaHandler::handleRequest
+      Runtime: java17
+      MemorySize: 256
+      Timeout: 30
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:eu-north-1:084828565416:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: arn:aws:logs:eu-north-1:084828565416:log-group:/aws/lambda/pages:*
+            - Effect: Allow
+              Action:
+                - ec2:DescribeNetworkInterfaces
+                - ec2:CreateNetworkInterface
+                - ec2:DeleteNetworkInterface
+                - ec2:DescribeInstances
+                - ec2:AttachNetworkInterface
+              Resource: '*'
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-04d27e332409719bc
+          - sg-0efdaec8b6dd45aab
+          - sg-06cb953f0b79305bb
+        SubnetIds:
+          - subnet-0677f857a04b07da8
+          - subnet-06ec8ddeb623b3f9e
+          - subnet-02ce3eebf7110a947
+      Events:
+        ApiGetPages:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books/{book_id}/pages
+            Method: GET
+        ApiPostPage:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books/{book_id}/pages
+            Method: POST
+
+Outputs:
+  RestApiUrl:
+    Value: !Sub 'https://${SharedRestApi}.execute-api.${AWS::Region}.amazonaws.com/dev'
+    Export:
+      Name: SharedRestApiUrl
+  AuthenticateFunction:
+    Value: !GetAtt AuthenticateFunction.Arn
+  BooksFunction:
+    Value: !GetAtt BooksFunction.Arn
+  PagesFunction:
+    Value: !GetAtt PagesFunction.Arn
