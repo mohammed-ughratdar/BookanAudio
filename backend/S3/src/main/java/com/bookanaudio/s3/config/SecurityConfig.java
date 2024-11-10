@@ -1,4 +1,4 @@
-package com.bookanaudio.books.config;
+package com.bookanaudio.s3.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
