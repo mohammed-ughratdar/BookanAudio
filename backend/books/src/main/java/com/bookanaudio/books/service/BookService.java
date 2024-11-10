@@ -44,7 +44,7 @@ public class BookService {
         return allBooks;
     }
 
-    public BookResponse saveBook(BookRequest bookRequest, MultipartFile bookFile) {
+    public BookResponse saveBook(BookRequest bookRequest) {
 
         Book book = new Book();
         book.setName(bookRequest.getName());
@@ -53,7 +53,6 @@ public class BookService {
         book.setChapterNamingScheme(bookRequest.getChapterNamingScheme());
 
         Book savedBook = bookRepository.save(book);
-        extractPagesService.uploadBook(bookFile, savedBook.getId());
 
         BookResponse bookResponse = new BookResponse();
         bookResponse.setId(savedBook.getId());
