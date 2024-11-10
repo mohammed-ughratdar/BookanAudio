@@ -1,10 +1,10 @@
-package com.bookanaudio.books.service;
+package com.bookanaudio.s3.service;
 
-import com.bookanaudio.books.dto.PageData;
+import com.bookanaudio.s3.dto.PageData;
+import com.bookanaudio.s3.service.PageService;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -14,6 +14,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.amazonaws.HttpMethod;
 import java.io.IOException;
 
@@ -29,13 +30,17 @@ public class ExtractPagesService {
     private final AmazonS3 s3Client;
     private final String bucketName;
     private final String awsRegion;
+    private final PageService pageService;
 
+    @Autowired
     public ExtractPagesService(
             @Value("${s3_bucket_name}") String bucketName,
             @Value("${iam_access_key}") String accessKey,
             @Value("${iam_secret_key}") String secretKey,
-            @Value("${aws_region}") String awsRegion
+            @Value("${aws_region}") String awsRegion,
+            PageService pageService
     ) {
+        this.pageService = pageService;
         this.bucketName = bucketName;
         this.awsRegion = awsRegion;
         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
@@ -45,7 +50,6 @@ public class ExtractPagesService {
                 .build();
     }
 
-    @Async
     public void uploadBook(Long bookId, String fileName) {
     
         String bookDownloadUrl = generatGETPresignedUrl(fileName);
@@ -55,12 +59,7 @@ public class ExtractPagesService {
 
         
             List<PageData> pagesData = extractPages(document, fileName, bookId);
-            
-            pagesData.forEach(page -> 
-                System.out.println("Book ID: " + page.getBookId() +
-                                ", URL: " + page.getPageUrl() +
-                                ", Page Number: " + page.getPageNumber())
-            );
+            pageService.savePages(pagesData);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -101,18 +100,6 @@ public class ExtractPagesService {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public URL generatePUTPresignedUrl(String fileName) {
-        long expirationTimeMillis = System.currentTimeMillis() + 1000 * 60 * 20; 
-        Date expiration = new Date(expirationTimeMillis);
-
-        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, fileName)
-                .withMethod(HttpMethod.PUT)
-                .withExpiration(expiration);
-
-        URL url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
-        return url;
     }
 
     public String generatGETPresignedUrl(String fileName) {

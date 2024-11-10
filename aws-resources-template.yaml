@@ -3,13 +3,16 @@ Transform: AWS::Serverless-2016-10-31
 Description: A Serverless application with shared REST API Gateway and multiple Lambda modules.
 
 Resources:
-  # Shared REST API Gateway
   SharedRestApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: dev
 
-  # Auth Module Lambda function
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: SQSQueue
+
   AuthenticateFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -24,6 +27,20 @@ Resources:
         Size: 512
       Environment:
         Variables:
+          s3_bucket_name: "bookanaudio"
+          google_token_endpoint: "https://oauth2.googleapis.com/token"
+          jwt_expiration: "36000000"
+          jwt_secret_key: "QDoBBK26MGfreN7+fduLGfdQb0xZYznT+sAnMQTrshA"
+          google_client_id: "284511919951-m302te4ql07i61nnc1l2h4n4ld1s2skq.apps.googleusercontent.com"
+          iam_access_key: "AKIARHQBNF6UE4BWXTHR"
+          DB_URL: "jdbc:postgresql://bookanaudio.cluster-c54es4ekqdow.eu-north-1.rds.amazonaws.com:5432/bookanaudio"
+          google_redirect_uri: "http://localhost:8080/auth/oauth/callback"
+          DB_USERNAME: "mohammed"
+          google_user_info_endpoint: "https://www.googleapis.com/oauth2/v2/userinfo"
+          iam_secret_key: "T7IWpZ8FvB4QCe/VxwwiggW3Xx35ydCbeWq2PdSw"
+          DB_PASSWORD: "12345"
+          google_client_secret: "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"
+          aws_region: "eu-north-1"
       EventInvokeConfig:
         MaximumEventAgeInSeconds: 21600
         MaximumRetryAttempts: 2
@@ -49,12 +66,10 @@ Resources:
               Resource: '*'
       VpcConfig:
         SecurityGroupIds:
+          - sg-063f0bf0ff3291693
           - sg-04d27e332409719bc
-          - sg-0efdaec8b6dd45aab
-          - sg-06cb953f0b79305bb
+          - sg-0281fd02a523fd6db
         SubnetIds:
-          - subnet-0677f857a04b07da8
-          - subnet-06ec8ddeb623b3f9e
           - subnet-02ce3eebf7110a947
       Events:
         ApiAuthLogin:
@@ -76,7 +91,6 @@ Resources:
             Path: /auth/verify
             Method: GET
 
-  # Books Module Lambda function
   BooksFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -91,37 +105,38 @@ Resources:
         Size: 512
       Environment:
         Variables:
+          s3_bucket_name: "bookanaudio"
+          google_token_endpoint: "https://oauth2.googleapis.com/token"
+          jwt_expiration: "36000000"
+          jwt_secret_key: "QDoBBK26MGfreN7+fduLGfdQb0xZYznT+sAnMQTrshA"
+          google_client_id: "284511919951-m302te4ql07i61nnc1l2h4n4ld1s2skq.apps.googleusercontent.com"
+          iam_access_key: "AKIARHQBNF6UE4BWXTHR"
+          DB_URL: "jdbc:postgresql://bookanaudio.cluster-c54es4ekqdow.eu-north-1.rds.amazonaws.com:5432/bookanaudio"
+          google_redirect_uri: "http://localhost:8080/auth/oauth/callback"
+          DB_USERNAME: "mohammed"
+          google_user_info_endpoint: "https://www.googleapis.com/oauth2/v2/userinfo"
+          iam_secret_key: "T7IWpZ8FvB4QCe/VxwwiggW3Xx35ydCbeWq2PdSw"
+          DB_PASSWORD: "12345"
+          google_client_secret: "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"
+          aws_region: "eu-north-1"
+          sqs_url: "https://sqs.eu-north-1.amazonaws.com/084828565416/SQSQueue" 
       EventInvokeConfig:
         MaximumEventAgeInSeconds: 21600
         MaximumRetryAttempts: 2
       PackageType: Zip
       Policies:
+        - AWSLambdaBasicExecutionRole
         - Statement:
             - Effect: Allow
               Action:
-                - logs:CreateLogGroup
-              Resource: arn:aws:logs:eu-north-1:084828565416:*
-            - Effect: Allow
-              Action:
-                - logs:CreateLogStream
-                - logs:PutLogEvents
-              Resource: arn:aws:logs:eu-north-1:084828565416:log-group:/aws/lambda/books:*
-            - Effect: Allow
-              Action:
-                - ec2:DescribeNetworkInterfaces
-                - ec2:CreateNetworkInterface
-                - ec2:DeleteNetworkInterface
-                - ec2:DescribeInstances
-                - ec2:AttachNetworkInterface
-              Resource: '*'
+                - sqs:SendMessage
+              Resource: !GetAtt SQSQueue.Arn
       VpcConfig:
         SecurityGroupIds:
+          - sg-063f0bf0ff3291693
           - sg-04d27e332409719bc
-          - sg-0efdaec8b6dd45aab
-          - sg-06cb953f0b79305bb
+          - sg-0281fd02a523fd6db
         SubnetIds:
-          - subnet-0677f857a04b07da8
-          - subnet-06ec8ddeb623b3f9e
           - subnet-02ce3eebf7110a947
       Events:
         ApiGetBooks:
@@ -129,6 +144,12 @@ Resources:
           Properties:
             RestApiId: !Ref SharedRestApi
             Path: /books
+            Method: GET
+        CheckNet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books/check-net
             Method: GET
         ApiPostBook:
           Type: Api
@@ -142,8 +163,13 @@ Resources:
             RestApiId: !Ref SharedRestApi
             Path: /books/filter
             Method: GET
+        ApiGetSignedUrl:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books/pre-signed-url
+            Method: GET
 
-  # Pages Module Lambda function
   PagesFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -158,37 +184,33 @@ Resources:
         Size: 512
       Environment:
         Variables:
+          s3_bucket_name: "bookanaudio"
+          google_token_endpoint: "https://oauth2.googleapis.com/token"
+          jwt_expiration: "36000000"
+          jwt_secret_key: "QDoBBK26MGfreN7+fduLGfdQb0xZYznT+sAnMQTrshA"
+          google_client_id: "284511919951-m302te4ql07i61nnc1l2h4n4ld1s2skq.apps.googleusercontent.com"
+          iam_access_key: "AKIARHQBNF6UE4BWXTHR"
+          DB_URL: "jdbc:postgresql://bookanaudio.cluster-c54es4ekqdow.eu-north-1.rds.amazonaws.com:5432/bookanaudio"
+          google_redirect_uri: "http://localhost:8080/auth/oauth/callback"
+          DB_USERNAME: "mohammed"
+          google_user_info_endpoint: "https://www.googleapis.com/oauth2/v2/userinfo"
+          iam_secret_key: "T7IWpZ8FvB4QCe/VxwwiggW3Xx35ydCbeWq2PdSw"
+          DB_PASSWORD: "12345"
+          google_client_secret: "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"
+          aws_region: "eu-north-1"
+          sqs_url: "https://sqs.eu-north-1.amazonaws.com/084828565416/SQSQueue" 
       EventInvokeConfig:
         MaximumEventAgeInSeconds: 21600
         MaximumRetryAttempts: 2
       PackageType: Zip
       Policies:
-        - Statement:
-            - Effect: Allow
-              Action:
-                - logs:CreateLogGroup
-              Resource: arn:aws:logs:eu-north-1:084828565416:*
-            - Effect: Allow
-              Action:
-                - logs:CreateLogStream
-                - logs:PutLogEvents
-              Resource: arn:aws:logs:eu-north-1:084828565416:log-group:/aws/lambda/pages:*
-            - Effect: Allow
-              Action:
-                - ec2:DescribeNetworkInterfaces
-                - ec2:CreateNetworkInterface
-                - ec2:DeleteNetworkInterface
-                - ec2:DescribeInstances
-                - ec2:AttachNetworkInterface
-              Resource: '*'
+        - AWSLambdaBasicExecutionRole
       VpcConfig:
         SecurityGroupIds:
+          - sg-063f0bf0ff3291693
           - sg-04d27e332409719bc
-          - sg-0efdaec8b6dd45aab
-          - sg-06cb953f0b79305bb
+          - sg-0281fd02a523fd6db
         SubnetIds:
-          - subnet-0677f857a04b07da8
-          - subnet-06ec8ddeb623b3f9e
           - subnet-02ce3eebf7110a947
       Events:
         ApiGetPages:
@@ -204,14 +226,63 @@ Resources:
             Path: /books/{book_id}/pages
             Method: POST
 
+  S3Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/s3
+      Handler: com.bookanaudio.ProcessBookPagesLambda::handleRequest
+      Runtime: java17
+      MemorySize: 256
+      Timeout: 30
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          s3_bucket_name: "bookanaudio"
+          google_token_endpoint: "https://oauth2.googleapis.com/token"
+          jwt_expiration: "36000000"
+          jwt_secret_key: "QDoBBK26MGfreN7+fduLGfdQb0xZYznT+sAnMQTrshA"
+          google_client_id: "284511919951-m302te4ql07i61nnc1l2h4n4ld1s2skq.apps.googleusercontent.com"
+          iam_access_key: "AKIARHQBNF6UE4BWXTHR"
+          DB_URL: "jdbc:postgresql://bookanaudio.cluster-c54es4ekqdow.eu-north-1.rds.amazonaws.com:5432/bookanaudio"
+          google_redirect_uri: "http://localhost:8080/auth/oauth/callback"
+          DB_USERNAME: "mohammed"
+          google_user_info_endpoint: "https://www.googleapis.com/oauth2/v2/userinfo"
+          iam_secret_key: "T7IWpZ8FvB4QCe/VxwwiggW3Xx35ydCbeWq2PdSw"
+          DB_PASSWORD: "12345"
+          google_client_secret: "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"
+          aws_region: "eu-north-1"
+          sqs_url: "https://sqs.eu-north-1.amazonaws.com/084828565416/SQSQueue"
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+              Resource: arn:aws:s3:::bookanaudio/*
+        - Statement:
+            - Effect: Allow
+              Action:
+                - sqs:SendMessage
+              Resource: arn:aws:sqs:eu-north-1:084828565416:SQSQueue
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-063f0bf0ff3291693
+          - sg-04d27e332409719bc
+          - sg-0281fd02a523fd6db
+        SubnetIds:
+          - subnet-02ce3eebf7110a947
+      Events:
+        S3QueueEvent:
+          Type: SQS
+          Properties:
+            Queue: arn:aws:sqs:eu-north-1:084828565416:SQSQueue
+
 Outputs:
-  RestApiUrl:
-    Value: !Sub 'https://${SharedRestApi}.execute-api.${AWS::Region}.amazonaws.com/dev'
-    Export:
-      Name: SharedRestApiUrl
-  AuthenticateFunction:
-    Value: !GetAtt AuthenticateFunction.Arn
-  BooksFunction:
-    Value: !GetAtt BooksFunction.Arn
-  PagesFunction:
-    Value: !GetAtt PagesFunction.Arn
+  ApiUrl:
+    Description: URL for the API Gateway stage
+    Value: !Sub "https://${SharedRestApi}.execute-api.${AWS::Region}.amazonaws.com/dev/"
