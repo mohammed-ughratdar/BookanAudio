@@ -1,5 +1,6 @@
-package com.bookanaudio;
+/* package com.bookanaudio;
 
+import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.bookanaudio.s3.config.AppConfig;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.Message;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @Component("awsLambdaSqsFunction")
-public class AwsLambdaSqsFunction implements Function<Void, Void> {
+public class AwsLambdaSqsFunction implements Function<SQSEvent, Void> {
 
     private static final Logger log = LoggerFactory.getLogger(AwsLambdaSqsFunction.class);
 
@@ -28,14 +29,8 @@ public class AwsLambdaSqsFunction implements Function<Void, Void> {
     private AmazonSQS amazonSqs;
 
     @Override
-    public Void apply(Void empty) {
-        String queueUrl = appConfig.getQueueUrl();
-
-        log.info("Retrieving messages from queue: {}", queueUrl);
-
-        List<Message> messageList = getQueueMessageByQueueUrl(queueUrl);
-
-        for (Message message : messageList) {
+    public Void apply(SQSEvent event) {
+        for (SQSEvent.SQSMessage message : event.getRecords()) {
             log.info("Received message: {}", message.getBody());
 
             try {
@@ -54,19 +49,5 @@ public class AwsLambdaSqsFunction implements Function<Void, Void> {
 
         return null;
     }
-
-    private List<Message> getQueueMessageByQueueUrl(String queueUrl) {
-        log.info("Getting messages from queue URL: {}", queueUrl);
-
-        ReceiveMessageRequest messageRequest = new ReceiveMessageRequest(queueUrl)
-                .withWaitTimeSeconds(5)
-                .withMaxNumberOfMessages(2)
-                .withMessageAttributeNames("All");
-
-        List<Message> messages = amazonSqs.receiveMessage(messageRequest).getMessages();
-
-        log.info("Received {} messages from queue", messages.size());
-
-        return messages;
-    }
 }
+*/
