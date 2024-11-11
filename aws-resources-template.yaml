@@ -253,6 +253,7 @@ Resources:
           google_client_secret: "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"
           aws_region: "eu-north-1"
           sqs_url: "https://sqs.eu-north-1.amazonaws.com/084828565416/SQSQueue"
+          MAIN_CLASS: com.bookanaudio.MainApplication
       EventInvokeConfig:
         MaximumEventAgeInSeconds: 21600
         MaximumRetryAttempts: 2
