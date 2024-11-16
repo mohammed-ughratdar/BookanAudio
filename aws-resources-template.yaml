@@ -233,7 +233,7 @@ Resources:
       Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest
       Runtime: java17
       MemorySize: 256
-      Timeout: 30
+      Timeout: 300
       Architectures:
         - x86_64
       Environment:
@@ -253,6 +253,12 @@ Resources:
           google_client_secret: "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"
           aws_region: "eu-north-1"
           sqs_url: "https://sqs.eu-north-1.amazonaws.com/084828565416/SQSQueue"
+          openai_key: "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"
+          openai_url: "https://api.openai.com/v1/chat/completions"
+          ocr_api_url: "https://api.ocr.space/Parse/Image"
+          ocr_api_key: "K88529951788957"
+
+
           MAIN_CLASS: com.bookanaudio.MainApplication
       EventInvokeConfig:
         MaximumEventAgeInSeconds: 21600
