@@ -19,14 +19,14 @@ public class PageService {
         this.pageRepository = pageRepository;
     }
 
-    public void savePages(List<PageData> pagesData) {
-        for(PageData pageData: pagesData){
-            Page page = new Page();
-            page.setPageNumber(pageData.getPageNumber());
-            page.setBookId(pageData.getBookId());
-            page.setS3Url(pageData.getPageUrl());
+    public void savePage(PageData pageData) {
+        Page page = new Page();
+        page.setPageNumber(pageData.getPageNumber());
+        page.setBookId(pageData.getBookId());
+        page.setS3Url(pageData.getPageUrl());
+        page.setChapter(pageData.getChapterNumber());
 
-            pageRepository.save(page);
-        }
+        pageRepository.save(page);
+        
     }
 }
