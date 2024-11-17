@@ -14,21 +14,28 @@
     </properties>
 
     <dependencies>
+        <!-- AWS Lambda Core (required for AWS Lambda function) -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
             <version>1.2.1</version>
         </dependency>
+
+        <!-- AWS Lambda Events (required for event types like APIGatewayCustomAuthorizerRequest and Response) -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>
-            <version>3.11.0</version>
+            <version>3.10.0</version>
         </dependency>
+
+        <!-- Jackson (used for JSON processing) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.13.0</version>
         </dependency>
+
+        <!-- JJWT for JWT token parsing and validation -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
@@ -38,6 +45,7 @@
 
     <build>
         <plugins>
+            <!-- Maven Compiler Plugin to compile the source code -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -47,6 +55,8 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+
+            <!-- Maven Jar Plugin to package the Lambda function -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -54,8 +64,8 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>AuthAuthorizer</mainClass> 
+                            <!-- Specify the main class in the manifest file -->
+                            <mainClass>com.bookaudio.AuthAuthorizer</mainClass> <!-- Updated to include package name -->
                         </manifest>
                     </archive>
                 </configuration>

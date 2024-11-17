@@ -1,3 +1,5 @@
+package com.bookanaudio;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayCustomAuthorizerRequest;
@@ -7,7 +9,7 @@ import io.jsonwebtoken.Jwts;
 import java.util.Collections;
 import java.util.Date;
 
-public class AuthAuthorizer implements RequestHandler<APIGatewayCustomAuthorizerRequest, APIGatewayCustomAuthorizerResponse> {
+public class AuthAuthorizer implements RequestHandler, APIGatewayCustomAuthorizerResponse> {
 
     private final String SECRET_KEY;
 
