@@ -7,6 +7,12 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: dev
+      Auth:
+        Authorizers:
+          JWTAuthorizer:
+            FunctionArn: !GetAtt AuthorizerFunction.Arn
+            IdentitySource: "$method.request.header.Authorization"
+            AuthorizerResultTtlInSeconds: 300
 
   SQSQueue:
     Type: AWS::SQS::Queue
@@ -29,12 +35,12 @@ Resources:
         Variables:
           s3_bucket_name: "bookanaudio"
           google_token_endpoint: "https://oauth2.googleapis.com/token"
-          jwt_expiration: "36000000"
-          jwt_secret_key: "QDoBBK26MGfreN7+fduLGfdQb0xZYznT+sAnMQTrshA"
+          jwt_expiration: "600000"
+          jwt_secret_key: "iE3MgOBuwmD0E6QkZimYcp+E4wtQqhzRW8IbxSDHJjY="
           google_client_id: "284511919951-m302te4ql07i61nnc1l2h4n4ld1s2skq.apps.googleusercontent.com"
           iam_access_key: "AKIARHQBNF6UE4BWXTHR"
           DB_URL: "jdbc:postgresql://bookanaudio.cluster-c54es4ekqdow.eu-north-1.rds.amazonaws.com:5432/bookanaudio"
-          google_redirect_uri: "http://localhost:8080/auth/oauth/callback"
+          google_redirect_uri: "https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/auth/oauth/callback"
           DB_USERNAME: "mohammed"
           google_user_info_endpoint: "https://www.googleapis.com/oauth2/v2/userinfo"
           iam_secret_key: "T7IWpZ8FvB4QCe/VxwwiggW3Xx35ydCbeWq2PdSw"
@@ -88,8 +94,50 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref SharedRestApi
-            Path: /auth/verify
+            Path: /auth/oauth/callback
             Method: GET
+
+  AuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/authorizer
+      Handler: auth_authorizer.lambda_handler
+      Runtime: python3.9
+      MemorySize: 256
+      Timeout: 30
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+          s3_bucket_name: "bookanaudio"
+          google_token_endpoint: "https://oauth2.googleapis.com/token"
+          jwt_expiration: "600000"
+          jwt_secret_key: "iE3MgOBuwmD0E6QkZimYcp+E4wtQqhzRW8IbxSDHJjY="
+          google_client_id: "284511919951-m302te4ql07i61nnc1l2h4n4ld1s2skq.apps.googleusercontent.com"
+          iam_access_key: "AKIARHQBNF6UE4BWXTHR"
+          DB_URL: "jdbc:postgresql://bookanaudio.cluster-c54es4ekqdow.eu-north-1.rds.amazonaws.com:5432/bookanaudio"
+          google_redirect_uri: "https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/auth/oauth/callback"
+          DB_USERNAME: "mohammed"
+          google_user_info_endpoint: "https://www.googleapis.com/oauth2/v2/userinfo"
+          iam_secret_key: "T7IWpZ8FvB4QCe/VxwwiggW3Xx35ydCbeWq2PdSw"
+          DB_PASSWORD: "12345"
+          google_client_secret: "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"
+          aws_region: "eu-north-1"
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-063f0bf0ff3291693
+          - sg-04d27e332409719bc
+          - sg-0281fd02a523fd6db
+        SubnetIds:
+          - subnet-02ce3eebf7110a947
 
   BooksFunction:
     Type: AWS::Serverless::Function
@@ -107,12 +155,12 @@ Resources:
         Variables:
           s3_bucket_name: "bookanaudio"
           google_token_endpoint: "https://oauth2.googleapis.com/token"
-          jwt_expiration: "36000000"
-          jwt_secret_key: "QDoBBK26MGfreN7+fduLGfdQb0xZYznT+sAnMQTrshA"
+          jwt_expiration: "600000"
+          jwt_secret_key: "iE3MgOBuwmD0E6QkZimYcp+E4wtQqhzRW8IbxSDHJjY="
           google_client_id: "284511919951-m302te4ql07i61nnc1l2h4n4ld1s2skq.apps.googleusercontent.com"
           iam_access_key: "AKIARHQBNF6UE4BWXTHR"
           DB_URL: "jdbc:postgresql://bookanaudio.cluster-c54es4ekqdow.eu-north-1.rds.amazonaws.com:5432/bookanaudio"
-          google_redirect_uri: "http://localhost:8080/auth/oauth/callback"
+          google_redirect_uri: "https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/auth/oauth/callback"
           DB_USERNAME: "mohammed"
           google_user_info_endpoint: "https://www.googleapis.com/oauth2/v2/userinfo"
           iam_secret_key: "T7IWpZ8FvB4QCe/VxwwiggW3Xx35ydCbeWq2PdSw"
@@ -186,12 +234,12 @@ Resources:
         Variables:
           s3_bucket_name: "bookanaudio"
           google_token_endpoint: "https://oauth2.googleapis.com/token"
-          jwt_expiration: "36000000"
-          jwt_secret_key: "QDoBBK26MGfreN7+fduLGfdQb0xZYznT+sAnMQTrshA"
+          jwt_expiration: "600000"
+          jwt_secret_key: "iE3MgOBuwmD0E6QkZimYcp+E4wtQqhzRW8IbxSDHJjY="
           google_client_id: "284511919951-m302te4ql07i61nnc1l2h4n4ld1s2skq.apps.googleusercontent.com"
           iam_access_key: "AKIARHQBNF6UE4BWXTHR"
           DB_URL: "jdbc:postgresql://bookanaudio.cluster-c54es4ekqdow.eu-north-1.rds.amazonaws.com:5432/bookanaudio"
-          google_redirect_uri: "http://localhost:8080/auth/oauth/callback"
+          google_redirect_uri: "https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/auth/oauth/callback"
           DB_USERNAME: "mohammed"
           google_user_info_endpoint: "https://www.googleapis.com/oauth2/v2/userinfo"
           iam_secret_key: "T7IWpZ8FvB4QCe/VxwwiggW3Xx35ydCbeWq2PdSw"
@@ -240,12 +288,12 @@ Resources:
         Variables:
           s3_bucket_name: "bookanaudio"
           google_token_endpoint: "https://oauth2.googleapis.com/token"
-          jwt_expiration: "36000000"
-          jwt_secret_key: "QDoBBK26MGfreN7+fduLGfdQb0xZYznT+sAnMQTrshA"
+          jwt_expiration: "600000"
+          jwt_secret_key: "iE3MgOBuwmD0E6QkZimYcp+E4wtQqhzRW8IbxSDHJjY="
           google_client_id: "284511919951-m302te4ql07i61nnc1l2h4n4ld1s2skq.apps.googleusercontent.com"
           iam_access_key: "AKIARHQBNF6UE4BWXTHR"
           DB_URL: "jdbc:postgresql://bookanaudio.cluster-c54es4ekqdow.eu-north-1.rds.amazonaws.com:5432/bookanaudio"
-          google_redirect_uri: "http://localhost:8080/auth/oauth/callback"
+          google_redirect_uri: "https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/auth/oauth/callback"
           DB_USERNAME: "mohammed"
           google_user_info_endpoint: "https://www.googleapis.com/oauth2/v2/userinfo"
           iam_secret_key: "T7IWpZ8FvB4QCe/VxwwiggW3Xx35ydCbeWq2PdSw"
