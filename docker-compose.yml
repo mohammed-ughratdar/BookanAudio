@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566" 
+    environment:
+      - SERVICES=lambda,s3,sqs,apigateway,iam, cloudformation
+      - DEBUG=1
+      - LAMBDA_EXECUTOR=docker
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DEFAULT_REGION=us-east-1     
+      - DATA_DIR=/tmp/localstack/data  
+      - LAMBDA_DEFAULT_TIMEOUT=60
+      - LAMBDA_RUNTIME_ENVIRONMENT_TIMEOUT=60
+    volumes:
+   #   - "./localstack:/etc/localstack/init/ready.d"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+   #   - "./localstack/data:/tmp/localstack/data" 
