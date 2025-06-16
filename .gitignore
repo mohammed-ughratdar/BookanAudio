@@ -47,5 +47,7 @@ copies
 # sam config files
 .aws-sam
 packaged.yaml
+packaged.yml
 temp
 aws-resources-template.yaml
+local-stack.resource-template.yml
