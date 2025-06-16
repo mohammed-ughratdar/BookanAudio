@@ -1,0 +1,335 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless app for local development with LocalStack
+
+Parameters:
+  S3BucketName:
+    Type: String
+  GoogleTokenEndpoint:
+    Type: String
+  JwtExpiration:
+    Type: String
+  JwtSecretKey:
+    Type: String
+  GoogleClientId:
+    Type: String
+  DbUrl:
+    Type: String
+  GoogleRedirectUri:
+    Type: String
+  DbUsername:
+    Type: String
+  GoogleUserInfoEndpoint:
+    Type: String
+  DbPassword:
+    Type: String
+  GoogleClientSecret:
+    Type: String
+  AwsRegion:
+    Type: String
+  SqsUrl:
+    Type: String
+  OpenaiKey:
+    Type: String
+  OpenaiUrl:
+    Type: String
+  OcrApiUrl:
+    Type: String
+  OcrApiKey:
+    Type: String
+  MainClass:
+    Type: String
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: bookanaudio-artifacts-bucket
+
+  SharedRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      Auth:
+        Authorizers:
+          JWTAuthorizer:
+            FunctionArn: !GetAtt AuthorizerFunction.Arn
+            IdentitySource: "$method.request.header.Authorization"
+            AuthorizerResultTtlInSeconds: 300
+
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: SQSQueue
+
+  AuthenticateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/auth/target/original-main-0.0.1-SNAPSHOT.jar
+      Handler: com.bookanaudio.StreamLambdaHandler::handleRequest
+      Runtime: java17
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          "s3_bucket_name":  !Ref S3BucketName
+          "google_token_endpoint": !Ref GoogleTokenEndpoint
+          "jwt_expiration": !Ref JwtExpiration
+          "jwt_secret_key": !Ref JwtSecretKey
+          "google_client_id": !Ref GoogleClientId
+          "DB_URL": !Ref DbUrl
+          "google_redirect_uri": !Ref GoogleRedirectUri
+          "DB_USERNAME": !Ref DbUsername
+          "google_user_info_endpoint": !Ref GoogleUserInfoEndpoint
+          "DB_PASSWORD": !Ref DbPassword
+          "google_client_secret": !Ref GoogleClientSecret
+          "aws_region": !Ref AwsRegion
+          "sqs_url": !Ref SqsUrl
+          "openai_key": !Ref OpenaiKey
+          "openai_url": !Ref OpenaiUrl
+          "ocr_api_url": !Ref OcrApiUrl
+          "ocr_api_key": !Ref OcrApiKey
+          "MAIN_CLASS": !Ref MainClass
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - sqs:SendMessage
+                - sqs:ReceiveMessage
+                - sqs:DeleteMessage
+                - sqs:GetQueueAttributes
+              Resource: !GetAtt SQSQueue.Arn
+      Events:
+        ApiAuthLogin:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /auth/login
+            Method: POST
+        ApiAuthRegister:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /auth/register
+            Method: POST
+        ApiAuthVerify:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /auth/oauth/callback
+            Method: GET
+
+  AuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/authorizer
+      Handler: auth_authorizer.lambda_handler
+      Runtime: python3.9
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          "s3_bucket_name":  !Ref S3BucketName
+          "google_token_endpoint": !Ref GoogleTokenEndpoint
+          "jwt_expiration": !Ref JwtExpiration
+          "jwt_secret_key": !Ref JwtSecretKey
+          "google_client_id": !Ref GoogleClientId
+          "DB_URL": !Ref DbUrl
+          "google_redirect_uri": !Ref GoogleRedirectUri
+          "DB_USERNAME": !Ref DbUsername
+          "google_user_info_endpoint": !Ref GoogleUserInfoEndpoint
+          "DB_PASSWORD": !Ref DbPassword
+          "google_client_secret": !Ref GoogleClientSecret
+          "aws_region": !Ref AwsRegion
+          "sqs_url": !Ref SqsUrl
+          "openai_key": !Ref OpenaiKey
+          "openai_url": !Ref OpenaiUrl
+          "ocr_api_url": !Ref OcrApiUrl
+          "ocr_api_key": !Ref OcrApiKey
+          "MAIN_CLASS": !Ref MainClass
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+  BooksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/books/target/original-main-0.0.1-SNAPSHOT.jar
+      Handler: com.bookanaudio.StreamLambdaHandler::handleRequest
+      Runtime: java17
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          "s3_bucket_name":  !Ref S3BucketName
+          "google_token_endpoint": !Ref GoogleTokenEndpoint
+          "jwt_expiration": !Ref JwtExpiration
+          "jwt_secret_key": !Ref JwtSecretKey
+          "google_client_id": !Ref GoogleClientId
+          "DB_URL": !Ref DbUrl
+          "google_redirect_uri": !Ref GoogleRedirectUri
+          "DB_USERNAME": !Ref DbUsername
+          "google_user_info_endpoint": !Ref GoogleUserInfoEndpoint
+          "DB_PASSWORD": !Ref DbPassword
+          "google_client_secret": !Ref GoogleClientSecret
+          "aws_region": !Ref AwsRegion
+          "sqs_url": !Ref SqsUrl
+          "openai_key": !Ref OpenaiKey
+          "openai_url": !Ref OpenaiUrl
+          "ocr_api_url": !Ref OcrApiUrl
+          "ocr_api_key": !Ref OcrApiKey
+          "MAIN_CLASS": !Ref MainClass
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - sqs:SendMessage
+              Resource: !GetAtt SQSQueue.Arn
+      Events:
+        ApiGetBooks:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books
+            Method: GET
+        CheckNet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books/check-net
+            Method: GET
+        ApiPostBook:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books
+            Method: POST
+        ApiFilterBooks:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books/filter
+            Method: GET
+        ApiGetSignedUrl:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books/pre-signed-url
+            Method: GET
+
+  PagesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/pages/target/original-main-0.0.1-SNAPSHOT.jar
+      Handler: com.bookanaudio.StreamLambdaHandler::handleRequest
+      Runtime: java17
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          "s3_bucket_name":  !Ref S3BucketName
+          "google_token_endpoint": !Ref GoogleTokenEndpoint
+          "jwt_expiration": !Ref JwtExpiration
+          "jwt_secret_key": !Ref JwtSecretKey
+          "google_client_id": !Ref GoogleClientId
+          "DB_URL": !Ref DbUrl
+          "google_redirect_uri": !Ref GoogleRedirectUri
+          "DB_USERNAME": !Ref DbUsername
+          "google_user_info_endpoint": !Ref GoogleUserInfoEndpoint
+          "DB_PASSWORD": !Ref DbPassword
+          "google_client_secret": !Ref GoogleClientSecret
+          "aws_region": !Ref AwsRegion
+          "sqs_url": !Ref SqsUrl
+          "openai_key": !Ref OpenaiKey
+          "openai_url": !Ref OpenaiUrl
+          "ocr_api_url": !Ref OcrApiUrl
+          "ocr_api_key": !Ref OcrApiKey
+          "MAIN_CLASS": !Ref MainClass
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Events:
+        ApiGetPages:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books/{book_id}/pages
+            Method: GET
+        ApiPostPage:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SharedRestApi
+            Path: /books/{book_id}/pages
+            Method: POST
+
+  S3Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/s3/target/function-sample-aws-0.0.1-SNAPSHOT.jar
+      Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest
+      Runtime: java17
+      MemorySize: 256
+      Timeout: 300
+      Environment:
+        Variables:
+          "s3_bucket_name":  !Ref S3BucketName
+          "google_token_endpoint": !Ref GoogleTokenEndpoint
+          "jwt_expiration": !Ref JwtExpiration
+          "jwt_secret_key": !Ref JwtSecretKey
+          "google_client_id": !Ref GoogleClientId
+          "DB_URL": !Ref DbUrl
+          "google_redirect_uri": !Ref GoogleRedirectUri
+          "DB_USERNAME": !Ref DbUsername
+          "google_user_info_endpoint": !Ref GoogleUserInfoEndpoint
+          "DB_PASSWORD": !Ref DbPassword
+          "google_client_secret": !Ref GoogleClientSecret
+          "aws_region": !Ref AwsRegion
+          "sqs_url": !Ref SqsUrl
+          "openai_key": !Ref OpenaiKey
+          "openai_url": !Ref OpenaiUrl
+          "ocr_api_url": !Ref OcrApiUrl
+          "ocr_api_key": !Ref OcrApiKey
+          "MAIN_CLASS": !Ref MainClass
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+              Resource: "*"
+        - Statement:
+            - Effect: Allow
+              Action:
+                - sqs:SendMessage
+              Resource: !GetAtt SQSQueue.Arn
+      Events:
+        S3QueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt SQSQueue.Arn
+
+Outputs:
+  ApiUrl:
+    Description: URL for the API Gateway stage
+    Value: !Sub "http://${SharedRestApi}.execute-api.localhost.localstack.cloud:4566/dev/"

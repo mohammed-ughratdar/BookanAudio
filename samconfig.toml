@@ -1,0 +1,30 @@
+version = 0.1
+
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "bookanaudio-stack"
+s3_bucket = "bookanaudio-artifacts-bucket"
+s3_prefix = "bookanaudio"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+parameter_overrides = [
+  "S3BucketName=$S3BucketName",
+  "GoogleTokenEndpoint=$GoogleTokenEndpoint",
+  "JwtExpiration=$JwtExpiration",
+  "JwtSecretKey=$JwtSecretKey",
+  "GoogleClientId=$GoogleClientId",
+  "DbUrl=$DbUrl",
+  "GoogleRedirectUri=$GoogleRedirectUri",
+  "DbUsername=$DbUsername",
+  "GoogleUserInfoEndpoint=$GoogleUserInfoEndpoint",
+  "DbPassword=$DbPassword",
+  "GoogleClientSecret=$GoogleClientSecret",
+  "AwsRegion=$AwsRegion",
+  "SqsUrl=$SqsUrl",
+  "OpenaiKey=$OpenaiKey",
+  "OpenaiUrl=$OpenaiUrl",
+  "OcrApiUrl=$OcrApiUrl",
+  "OcrApiKey=$OcrApiKey",
+  "MainClass=$MainClass"
+]
