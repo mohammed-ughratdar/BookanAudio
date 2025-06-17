@@ -98,7 +98,7 @@ public class AuthService {
         return user;
     }
 
-    private String fetchAccessToken(String authorizationCode) {
+    protected String fetchAccessToken(String authorizationCode) {
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, String> requestBody = new HashMap<>();
@@ -117,7 +117,7 @@ public class AuthService {
 
     }
 
-    private OAuthUser fetchOAuthUserInfo(String accessToken) {
+    protected OAuthUser fetchOAuthUserInfo(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
@@ -128,7 +128,7 @@ public class AuthService {
         return response.getBody();
     }
 
-    private String generateUsername(String email) {
+    protected String generateUsername(String email) {
         return email.split("@")[0] + "_user";
     }
 
