@@ -4,11 +4,7 @@ on:
   push:
     paths:
       - 'backend/books/**'
-      - '.github/workflows/**'
-  pull_request:
-    paths:
-      - 'backend/books/**'
-      - '.github/workflows/**'
+      - '.github/workflows/books.yml'
 
 jobs:
   test:

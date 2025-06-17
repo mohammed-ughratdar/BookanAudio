@@ -4,11 +4,7 @@ on:
   push:
     paths:
       - 'backend/pages/**'
-      - '.github/workflows/**'
-  pull_request:
-    paths:
-      - 'backend/pages/**'
-      - '.github/workflows/**'
+      - '.github/workflows/pages.yml'
 
 jobs:
   test:
