@@ -1,10 +1,10 @@
-name: Auth Module CI
+name: CI - Auth Module
 
 on:
   push:
     paths:
       - 'backend/auth/**'
-      - '.github/workflows/auth-ci.yml'
+      - '.github/workflows/auth.yml'
 
 jobs:
   test:
