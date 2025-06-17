@@ -77,7 +77,21 @@ class PagesServiceTest {
 
         pageService.savePages(pageRequests);
 
-        verify(pageRepository, times(2)).save(any(Page.class));
+        ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
+        verify(pageRepository, times(2)).save(pageCaptor.capture());
+
+        List<Page> capturedPages = pageCaptor.getAllValues();
+        assertEquals(2, capturedPages.size());
+
+        Page capturedPage1 = capturedPages.get(0);
+        assertEquals(1L, capturedPage1.getBookId());
+        assertEquals(1, capturedPage1.getPageNumber());
+        assertEquals("s3://url/1", capturedPage1.getS3Url());
+
+        Page capturedPage2 = capturedPages.get(1);
+        assertEquals(1L, capturedPage2.getBookId());
+        assertEquals(2, capturedPage2.getPageNumber());
+        assertEquals("s3://url/2", capturedPage2.getS3Url());
     }
 
 }
