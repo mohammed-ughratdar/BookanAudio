@@ -1,4 +1,4 @@
-name: Auth Module CI
+name: CI - Auth Module
 
 on:
   push:
