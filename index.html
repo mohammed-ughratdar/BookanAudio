@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookanaudio Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        main {
+            padding: 20px;
+        }
+        section {
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        pre {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        footer {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bookanaudio Documentation</h1>
+    </header>
+    <main>
+        <section>
+            <h2>About Bookanaudio</h2>
+            <p>
+                Bookanaudio is a platform that simplifies managing books and audio files. It automates extracting pages 
+                from uploaded books, identifies chapters using OCR and AI (openAI), and the user can map audio files to pages efficiently since the audios will be automatically mapped to the chapters.
+                The platform is under active development. Audio file processing is still under development.
+            </p>
+            <p>
+                The schemas of the project can be found 
+                <a href="https://api-pages.s3.eu-north-1.amazonaws.com/BookanAudio-Schemas.html" target="_blank">Project Schemas</a> 
+                (Also work in progress).
+            </p>
+
+        </section>
+        <section>
+            <h2>Authentication</h2>
+            <h3>Login</h3>
+            <pre>
+POST https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/auth/login
+
+Request Body:
+{
+  "username": "your_username",
+  "password": "your_password"
+}
+
+CURL Command:
+curl -X POST \
+  https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "your_username", "password": "your_password"}'
+            </pre>
+            
+            <h3>Register</h3>
+            <pre>
+POST https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/auth/register
+
+Request Body:
+{
+  "username": "your_username",
+  "password": "your_password",
+  "email": "your_email"
+}
+
+CURL Command:
+curl -X POST \
+  https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "your_username", "password": "your_password", "email": "your_email"}'
+            </pre>
+            
+            <h3>OAuth Login</h3>
+<pre>
+OAuth Login URL:
+GET https://accounts.google.com/o/oauth2/v2/auth
+    ?client_id=284511919951-m302te4ql07i61nnc1l2h4n4ld1s2skq.apps.googleusercontent.com
+    &redirect_uri=https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/auth/oauth/callback
+    &response_type=code
+    &scope=openid%20profile%20email
+
+Note: OAuth login is restricted to whitelisted email addresses configured in the app's Google Console settings since the app is in testing mode.
+</pre>
+
+            
+        </section>
+        <section>
+            <h2>Book Management</h2>
+            <h3>Upload a Book</h3>
+            <pre>
+GET https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/books/pre-signed-url?filename=&lt;your_filename&gt;
+
+CURL Command:
+curl -X GET \
+  "https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/books/pre-signed-url?filename=&lt;your_filename&gt;" \
+  -H "Authorization: Bearer &lt;your_token&gt;"
+            </pre>
+            <h3>Save a Book and Start Page Extraction</h3>
+            <pre>
+POST https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/books
+
+Request Body:
+{
+  "name": "&lt;your_filename&gt;",
+  "author": "&lt;book_author&gt;",
+  "genre": "&lt;book_genre&gt;"
+}
+
+CURL Command:
+curl -X POST \
+  https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/books \
+  -H "Authorization: Bearer &lt;your_token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "&lt;your_filename&gt;", "author": "&lt;book_author&gt;", "genre": "&lt;book_genre&gt;"}'
+            </pre>
+            <h3>Filter Books</h3>
+            <pre>
+GET https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/books/filter?author=William%20Shakespeare&genre=
+
+CURL Command:
+curl -X GET \
+  "https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/books/filter?author=William%20Shakespeare&genre=" \
+  -H "Authorization: Bearer &lt;your_token&gt;"
+            </pre>
+            <h3>Get Pages of a Book</h3>
+            <pre>
+GET https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/books/{book_id}/pages
+
+CURL Command:
+curl -X GET \
+  https://lh3mxl5fb9.execute-api.eu-north-1.amazonaws.com/dev/books/{book_id}/pages \
+  -H "Authorization: Bearer &lt;your_token&gt;"
+            </pre>
+        </section>
+        <section>
+            <h2>Additional Notes</h2>
+            <ul>
+                <li>Ensure to include the token obtained during login in the <code>Authorization</code> header for all endpoints.</li>
+                <li>Audio files processing feature will be added soon</li>
+            </ul>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Bookanaudio By Mohammed Ughratdar</p>
+    </footer>
+</body>
+</html>
