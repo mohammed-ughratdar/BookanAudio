@@ -3,14 +3,14 @@ import { LoginForm, LoginResponse } from '../types/LoginTypes';
 import { login } from '../api/auth';
 
 
-export const createTokenManager = () => {
+const tokenManager = (() => {
     let token: string | null = null; 
   
     return {
       setToken: (val: string) => (token = val),
       getToken: () => token,
     };
-  };
+  })();
 
 const Login: React.FC = () => {
     
