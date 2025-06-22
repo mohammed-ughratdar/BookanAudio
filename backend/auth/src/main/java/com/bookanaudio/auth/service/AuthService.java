@@ -18,6 +18,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.view.RedirectView;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +41,9 @@ public class AuthService {
 
     @Value("${google_user_info_endpoint}")
     private String userInfoEndpoint;
+
+    @Value("${frontend_oauth_base_url}")
+    private String frontendOAuthBaseURL;
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
@@ -71,7 +75,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public AuthResponse oauthLogin(String authorizationCode) {
+    public RedirectView oauthLogin(String authorizationCode) {
 
         String accessToken = fetchAccessToken(authorizationCode);
         OAuthUser oAuthUser = fetchOAuthUserInfo(accessToken);
@@ -82,8 +86,8 @@ public class AuthService {
             user = registerOauthUser(oAuthUser);
         }
 
-        String token = jwtUtil.generateToken(user.getUsername());
-        return new AuthResponse(token, user.getUsername());
+        String redirectUrl = frontendOAuthBaseURL + "?token=" + accessToken + "&username=" + user.getUsername();
+        return new RedirectView(redirectUrl);
     }
 
     public User registerOauthUser(OAuthUser oAuthUser) {
