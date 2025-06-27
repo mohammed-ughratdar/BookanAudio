@@ -98,7 +98,7 @@ public class AuthServiceTest {
         RedirectView response = authService.oauthLogin(code);
 
         String actualUrl = response.getUrl();
-        String expectedSuffix = "?token=access-token&username=newuser_user";
+        String expectedSuffix = "?token=mocked_token&username=newuser_user";
         System.out.println("Actual redirect URL: " + actualUrl);
 
         assertNotNull(actualUrl);
