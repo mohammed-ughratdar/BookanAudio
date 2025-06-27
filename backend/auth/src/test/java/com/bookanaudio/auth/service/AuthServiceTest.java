@@ -11,7 +11,7 @@ import com.bookanaudio.auth.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
+import org.springframework.web.servlet.view.RedirectView;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -95,10 +95,15 @@ public class AuthServiceTest {
         when(userRepository.findByEmail("newuser@example.com")).thenReturn(null);
         when(jwtUtil.generateToken(any())).thenReturn("mocked_token");
 
-        AuthResponse response = authService.oauthLogin(code);
+        RedirectView response = authService.oauthLogin(code);
 
-        assertEquals("mocked_token", response.getToken());
-        assertEquals("newuser_user", response.getUsername());
+        String actualUrl = response.getUrl();
+        String expectedSuffix = "?token=mocked_token&username=newuser_user";
+        System.out.println("Actual redirect URL: " + actualUrl);
+
+        assertNotNull(actualUrl);
+        assertTrue(actualUrl.endsWith(expectedSuffix), "Redirect URL should end with token and username");
+
     }
 
     @Test

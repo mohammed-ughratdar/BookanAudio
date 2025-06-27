@@ -7,6 +7,7 @@ import com.bookanaudio.auth.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequestMapping("/auth")
@@ -28,9 +29,7 @@ public class AuthController {
     }
 
     @GetMapping("/oauth/callback")
-    public ResponseEntity<AuthResponse> oauthLogin(@RequestParam("code") String authorizationCode) {
-        AuthResponse authResponse = authService.oauthLogin(authorizationCode);
-
-        return ResponseEntity.ok(authResponse);
+    public RedirectView oauthLogin(@RequestParam("code") String authorizationCode) {
+        return authService.oauthLogin(authorizationCode);
     }
 }

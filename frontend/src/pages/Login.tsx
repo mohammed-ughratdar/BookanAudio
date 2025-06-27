@@ -1,16 +1,7 @@
 import React, { useState } from 'react';
 import { LoginForm, LoginResponse } from '../types/LoginTypes';
 import { login } from '../api/auth';
-
-
-const tokenManager = (() => {
-    let token: string | null = null; 
-  
-    return {
-      setToken: (val: string) => (token = val),
-      getToken: () => token,
-    };
-  })();
+import { useToken } from '../customHooks/TokenContext';
 
 const Login: React.FC = () => {
     
@@ -19,7 +10,7 @@ const Login: React.FC = () => {
     password: '',
   });
 
-  const tokenManager = createTokenManager()
+  const { setToken } = useToken();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {name, value} = e.target;
@@ -33,7 +24,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
         const loginResult: LoginResponse = await login(form)
-        tokenManager.setToken(loginResult.token)
+        setToken(loginResult.token)
 
     } catch(error) {
         console.log("Login Error", error)
