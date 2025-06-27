@@ -86,7 +86,8 @@ public class AuthService {
             user = registerOauthUser(oAuthUser);
         }
 
-        String redirectUrl = frontendOAuthBaseURL + "?token=" + accessToken + "&username=" + user.getUsername();
+        String jwtToken = jwtUtil.generateToken(user.getUsername());
+        String redirectUrl = frontendOAuthBaseURL + "?token=" + jwtToken + "&username=" + user.getUsername();
         return new RedirectView(redirectUrl);
     }
 
