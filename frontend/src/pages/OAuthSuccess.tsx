@@ -14,7 +14,7 @@ const OAuthSuccess = () => {
     if (token) {
       setToken(token);
       localStorage.setItem("username", username || "");
-      navigate("/dashboard^");
+      navigate("/dashboard");
     } else {
       navigate("/login");
     }
